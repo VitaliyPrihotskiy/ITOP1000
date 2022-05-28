@@ -1,0 +1,65 @@
+<div *ngIf="ratesStates$ | async as ratesStates">
+    <header>
+        <span>
+            <!-- Курс долара {{ratesStates[0].rateBuy}}/{{ratesStates[0].rateSell}} -->
+        </span>
+        <span>
+            <!-- Курс євро {{ratesStates[1].rateBuy}}/{{ratesStates[1].rateSell}} -->
+        </span>
+    </header>
+    <main>
+        <div class="box">
+            <h2>Конвертер валют</h2>
+            <div class="content">
+                <div class="currency-box">
+                    <input
+                        #firstInp
+                        [value]="firstCurrencyValue$"
+                        (change)="changeRate(firstInp.value)"
+                    >
+                    <div class="ng-autocomplete">
+                        <ng-autocomplete
+                            [data]="data"
+                            [searchKeyword]="keyword"
+                            placeholder="Select currency code"
+                            (selected)='changeRate($event)'
+                            [itemTemplate]="itemTemplate"
+                        
+                        >
+                        </ng-autocomplete>
+
+                        <ng-template
+                            #itemTemplate
+                            let-item
+                        >
+                            <a [innerHTML]="item.alphaCode"></a>
+                        </ng-template>
+                    </div>
+                </div>
+                <div class="currency-box">
+                    <input 
+                    #secondInp
+                    [value]="secondCurrencyValue$"
+                    (change)="changeRateReverse(secondInp.value)">
+                    <div class="ng-autocomplete">
+                        <ng-autocomplete
+                            [data]="data"
+                            [searchKeyword]="keyword"
+                            placeholder="Select currency code"
+                            (selected)='changeRateReverse($event)'
+                            [itemTemplate]="itemTemplate"
+                        >
+                        </ng-autocomplete>
+
+                        <ng-template
+                            #itemTemplate
+                            let-item
+                        >
+                            <a [innerHTML]="item.alphaCode"></a>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

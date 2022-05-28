@@ -1,7 +1,7 @@
 {
   "root": true,
   "ignorePatterns": [
-    "projects/**/*"
+    "**/*.spec.ts"
   ],
   "overrides": [
     {
@@ -10,54 +10,77 @@
       ],
       "parserOptions": {
         "project": [
-          "tsconfig.json",
+          "tsconfig.*?.json",
           "e2e/tsconfig.json"
         ],
         "createDefaultProgram": true
       },
       "extends": [
-        "eslint:recommended",
         "plugin:@angular-eslint/recommended",
+        "airbnb-typescript/base",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:prettier/recommended",
         "plugin:@angular-eslint/template/process-inline-templates",
-        "plugin:prettier/recommended"
+        "plugin:import/recommended"
       ],
-      "rules": {
-        "@angular-eslint/component-selector": [
+      "rules": {"rxjs/no-async-subscribe": "error",
+        "rxjs/no-ignored-observable": "error",
+        "rxjs/no-nested-subscribe": "error",
+        "rxjs/no-unbound-methods": "error",
+        "rxjs/throw-error": "error",
+        "import/prefer-default-export": "off",
+        "no-unused-vars": "off",
+        "class-methods-use-this": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/lines-between-class-members": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/explicit-member-accessibility": [
           "error",
           {
-            "prefix": "app",
-            "style": "kebab-case",
-            "type": "element"
+            "accessibility": "no-public"
           }
         ],
-        "@angular-eslint/directive-selector": [
+        "no-console": [
           "error",
           {
-            "prefix": "app",
-            "style": "camelCase",
-            "type": "attribute"
+            "allow": ["warn", "error"]
           }
         ],
-        "sort-imports": [
-          "error",
-          {
-            "ignoreCase": false,
-            "ignoreDeclarationSort": false,
-            "ignoreMemberSort": false,
-            "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
-            "allowSeparatedGroups": false
+        "no-debugger": "error",
+        "import/named": "off"
+      },
+      "settings": {
+        "import/resolver": {
+          "typescript": {
+            "alwaysTryTypes": true
           }
-        ]
+        }
       }
     },
     {
-      "files": [
-        "*.html"
-      ],
-      "extends": [
-        "plugin:@angular-eslint/template/recommended"
-      ],
-      "rules": {}
+      "files": ["*.html"],
+      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "rules": {
+        "@angular-eslint/template/banana-in-box": ["error"],
+        "@angular-eslint/template/no-any": ["warn"],
+        "@angular-eslint/template/no-autofocus": ["error"],
+        "@angular-eslint/template/no-distracting-elements": ["error"],
+        "@angular-eslint/template/conditional-complexity": ["error"],
+        "@angular-eslint/template/eqeqeq": "off"
+      }
+    },
+    {
+      "files": ["*.html"],
+      "excludedFiles": ["*inline-template-*.component.html"],
+      "extends": ["plugin:prettier/recommended"],
+      "rules": {
+        "prettier/prettier": [
+          "error",
+          {
+            "parser": "angular"
+          }
+        ]
+      }
     }
   ]
 }
