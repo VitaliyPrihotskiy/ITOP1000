@@ -1,10 +1,10 @@
-<div *ngIf="ratesStates$ | async as ratesStates">
+<div *ngIf="ratesStates$ | async as rate">
     <header>
         <span>
-            <!-- Курс долара {{ratesStates[0].rateBuy}}/{{ratesStates[0].rateSell}} -->
+            Курс долара {{rate[0].rateBuy}}/{{rate[0].rateSell}}
         </span>
         <span>
-            <!-- Курс євро {{ratesStates[1].rateBuy}}/{{ratesStates[1].rateSell}} -->
+            Курс євро {{rate[1].rateBuy}}/{{rate[1].rateSell}}
         </span>
     </header>
     <main>
@@ -15,19 +15,19 @@
                     <input
                         #firstInp
                         [value]="firstCurrencyValue$"
-                        (change)="changeRate(firstInp.value)"
+                        (change)="setCurrencyValue(firstInp.value,true)"
+                        formControlName="firstCurrencyValue"
                     >
+                    <span *ngIf="firstCurrencyValue.invalid && firstCurrencyValue.dirty">Можна вводити лише числа</span>
                     <div class="ng-autocomplete">
                         <ng-autocomplete
                             [data]="data"
                             [searchKeyword]="keyword"
                             placeholder="Select currency code"
-                            (selected)='changeRate($event)'
+                            (selected)='setCurrency($event,true)'
                             [itemTemplate]="itemTemplate"
-                        
                         >
                         </ng-autocomplete>
-
                         <ng-template
                             #itemTemplate
                             let-item
@@ -37,20 +37,22 @@
                     </div>
                 </div>
                 <div class="currency-box">
-                    <input 
-                    #secondInp
-                    [value]="secondCurrencyValue$"
-                    (change)="changeRateReverse(secondInp.value)">
+                    <input
+                        #secondInp
+                        [value]="secondCurrencyValue$"
+                        (change)="setCurrencyValue(secondInp.value,false)"
+                        formControlName="secondCurrencyValue"
+                    >
+                    <span *ngIf="secondCurrencyValue.invalid && secondCurrencyValue.dirty">Можна вводити лише числа</span>
                     <div class="ng-autocomplete">
                         <ng-autocomplete
                             [data]="data"
                             [searchKeyword]="keyword"
                             placeholder="Select currency code"
-                            (selected)='changeRateReverse($event)'
+                            (selected)='setCurrency($event,false)'
                             [itemTemplate]="itemTemplate"
                         >
                         </ng-autocomplete>
-
                         <ng-template
                             #itemTemplate
                             let-item

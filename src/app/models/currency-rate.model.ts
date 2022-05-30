@@ -1,19 +1,32 @@
+export interface CurrencyRates {
+  usd: CurrencyRate[];
+}
 export interface CurrencyRate {
-  currencyCodeA: number;
-  currencyCodeB: number;
-  date: number;
-  rateSell: number;
-  rateBuy: number;
-  rateCross: number;
+  code: string;
+  alphaCode: string;
+  numericCode: string;
+  name: string;
+  rate: number;
+  date: string;
+  inverseRate: number;
 }
 export const initialCurrencyRateState: CurrencyRate = {
-  currencyCodeA: 0,
-  currencyCodeB: 0,
-  date: 0,
-  rateSell: 0,
-  rateBuy: 0,
-  rateCross: 0,
+  code: '',
+  alphaCode: '',
+  numericCode: '',
+  name: '',
+  rate: 0,
+  date: '',
+  inverseRate: 0,
 };
+export interface MonobankRate {
+  currencyCodeA: number,
+  currencyCodeB: number,
+  date: number,
+  rateSell: number,
+  rateBuy: number,
+  rateCross: number
+}
 export const currencyCodes = [
   { alphaCode: 'USD', numericCode: '840' },
   { alphaCode: 'EUR', numericCode: '978' },

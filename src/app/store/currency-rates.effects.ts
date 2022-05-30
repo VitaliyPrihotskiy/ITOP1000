@@ -1,18 +1,19 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable sort-imports */
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, EMPTY, filter, map, of, switchMap, withLatestFrom } from 'rxjs';
 import { CurrencyRatesService } from '../services/currency-rates.service';
 import {
+  loadCurrencyRate,
   loadCurrencyRates,
   loadCurrencyRatesFailure,
   loadCurrencyRatesSuccess,
+  loadCurrencyRateSuccess,
   setFirstCurrencyValue,
   setSecondCurrencyValue,
 } from './currency-rates.action';
 import {
+  getCurrencyRate,
   getFirstCurrency,
   getSecondCurrency,
 } from './currency-rates.selectors';
@@ -23,7 +24,7 @@ export class CurrencyRatesEffect {
     private readonly actions$: Actions,
     private readonly currencyRatesService: CurrencyRatesService,
     private readonly store: Store,
-  ) {}
+  ) { }
 
   loadCurrencyRates$ = createEffect(() =>
     this.actions$.pipe(
@@ -39,19 +40,54 @@ export class CurrencyRatesEffect {
     ),
   );
 
-  changeSecondCurrencyValue$ = createEffect(() =>
+  loadCurrencyRate$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(setFirstCurrencyValue),
+      ofType(loadCurrencyRate),
       withLatestFrom(
         this.store.select(getFirstCurrency),
         this.store.select(getSecondCurrency),
       ),
-      map(([{ firstCurrencyValue }, firstCurrency, secondCurrency]) => {
-        const secondCurrencyValue =
-          (firstCurrency.rateCross / secondCurrency.rateCross) *
-          firstCurrencyValue;
+      switchMap(([, firstCurrency, secondCurrency]) => {
+        return this.currencyRatesService.getCurrencyRate(firstCurrency, secondCurrency).pipe(
+          filter(isDefined),
+          map((currencyRate) => loadCurrencyRateSuccess({ currencyRate })),
+          catchError((error) => {
+            return of(loadCurrencyRatesFailure(error));
+          }),
+        );
+      }),
+    ),
+  );
+
+  changeSecondCurrencyValue$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setFirstCurrencyValue),
+      withLatestFrom(
+        this.store.select(getCurrencyRate),
+      ),
+      filter(([, currencyRate]) => isDefined(currencyRate)),
+      map(([{ firstCurrencyValue }, currencyRate]) => {
+        const secondCurrencyValue = firstCurrencyValue * (currencyRate?.rate || 0)
         return setSecondCurrencyValue({ secondCurrencyValue });
       }),
     ),
   );
+
+  changeFirstCurrencyValue$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(setSecondCurrencyValue),
+      withLatestFrom(
+        this.store.select(getCurrencyRate),
+      ),
+      filter(([, currencyRate]) => isDefined(currencyRate)),
+      map(([{ secondCurrencyValue }, currencyRate]) => {
+        const firstCurrencyValue = secondCurrencyValue * (currencyRate?.inverseRate || 0)
+        return setFirstCurrencyValue({ firstCurrencyValue });
+      }),
+    ),
+  );
 }
+
+const isDefined = <T>(arg: T | null | undefined): arg is T => {
+  return arg !== null && arg !== undefined;
+};

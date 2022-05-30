@@ -2,11 +2,15 @@ import { Action, createReducer, on } from '@ngrx/store';
 import {
   CurrencyRate,
   initialCurrencyRateState,
+  MonobankRate,
 } from '../models/currency-rate.model';
 import {
+  loadCurrencyRate,
+  loadCurrencyRateFailure,
   loadCurrencyRates,
   loadCurrencyRatesFailure,
   loadCurrencyRatesSuccess,
+  loadCurrencyRateSuccess,
   setFirstCurrency,
   setFirstCurrencyValue,
   setSecondCurrency,
@@ -16,21 +20,23 @@ import {
 export const CURRENCY_RATES_FEATURE_KEY = 'CurrencyRates';
 
 export interface CurrencyRatesState {
-  currencyRates: CurrencyRate[];
+  currencyRates: MonobankRate[];
+  currencyRate: CurrencyRate|null;
   isLoading: boolean;
   error: unknown;
-  firstCurrency: CurrencyRate;
-  secondCurrency: CurrencyRate;
+  firstCurrency: string;
+  secondCurrency: string;
   firstCurrencyValue: number | null;
   secondCurrencyValue: number | null;
 }
 
 const initialState: CurrencyRatesState = {
   currencyRates: [],
+  currencyRate: null,
   isLoading: false,
   error: null,
-  firstCurrency: initialCurrencyRateState,
-  secondCurrency: initialCurrencyRateState,
+  firstCurrency: '',
+  secondCurrency: '',
   firstCurrencyValue: null,
   secondCurrencyValue: null,
 };
@@ -41,13 +47,23 @@ const currencyRateReducer = createReducer(
     ...state,
     isLoading: true,
   })),
+  on(loadCurrencyRate, (state) => ({
+    ...state,
+    isLoading: true,
+  })),
   on(loadCurrencyRatesSuccess, (state, { currencyRates }) => ({
     ...state,
     currencyRates,
     isLoading: false,
     error: null,
   })),
-  on(loadCurrencyRatesFailure, (state, { error }) => ({
+  on(loadCurrencyRateSuccess, (state, { currencyRate }) => ({
+    ...state,
+    currencyRate,
+    isLoading: false,
+    error: null,
+  })),
+  on(loadCurrencyRatesFailure, loadCurrencyRateFailure, (state, { error }) => ({
     ...state,
     error,
     isLoading: false,
