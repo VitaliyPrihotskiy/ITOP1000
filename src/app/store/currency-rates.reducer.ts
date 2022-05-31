@@ -35,8 +35,8 @@ const initialState: CurrencyRatesState = {
   currencyRate: null,
   isLoading: false,
   error: null,
-  firstCurrency: '',
-  secondCurrency: '',
+  firstCurrency: 'USD',
+  secondCurrency: 'EUR',
   firstCurrencyValue: null,
   secondCurrencyValue: null,
 };
@@ -47,26 +47,31 @@ const currencyRateReducer = createReducer(
     ...state,
     isLoading: true,
   })),
-  on(loadCurrencyRate, (state) => ({
-    ...state,
-    isLoading: true,
-  })),
   on(loadCurrencyRatesSuccess, (state, { currencyRates }) => ({
     ...state,
     currencyRates,
     isLoading: false,
     error: null,
   })),
+  on(loadCurrencyRatesFailure, (state, { error }) => ({
+    ...state,
+    error:"Failed to load resource: the server responded with a status of 429 ()",
+    isLoading: false,
+  })),
+  on( loadCurrencyRateFailure, (state, { error }) => ({
+    ...state,
+    error,
+    isLoading: false,
+  })),
+  on(loadCurrencyRate, (state) => ({
+    ...state,
+    isLoading: true,
+  })),
   on(loadCurrencyRateSuccess, (state, { currencyRate }) => ({
     ...state,
     currencyRate,
     isLoading: false,
     error: null,
-  })),
-  on(loadCurrencyRatesFailure, loadCurrencyRateFailure, (state, { error }) => ({
-    ...state,
-    error,
-    isLoading: false,
   })),
   on(setFirstCurrency, (state, { firstCurrency }) => ({
     ...state,

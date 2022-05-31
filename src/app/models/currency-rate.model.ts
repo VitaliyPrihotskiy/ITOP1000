@@ -1,6 +1,3 @@
-export interface CurrencyRates {
-  usd: CurrencyRate[];
-}
 export interface CurrencyRate {
   code: string;
   alphaCode: string;
@@ -9,7 +6,8 @@ export interface CurrencyRate {
   rate: number;
   date: string;
   inverseRate: number;
-}
+};
+
 export const initialCurrencyRateState: CurrencyRate = {
   code: '',
   alphaCode: '',
@@ -19,6 +17,7 @@ export const initialCurrencyRateState: CurrencyRate = {
   date: '',
   inverseRate: 0,
 };
+
 export interface MonobankRate {
   currencyCodeA: number,
   currencyCodeB: number,
@@ -26,7 +25,13 @@ export interface MonobankRate {
   rateSell: number,
   rateBuy: number,
   rateCross: number
-}
+};
+
+export interface currencyCode {
+  alphaCode: string,
+  numericCode: string
+};
+
 export const currencyCodes = [
   { alphaCode: 'USD', numericCode: '840' },
   { alphaCode: 'EUR', numericCode: '978' },

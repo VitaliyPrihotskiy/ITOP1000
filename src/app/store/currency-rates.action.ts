@@ -41,10 +41,10 @@ export const setSecondCurrency = createAction(
 
 export const setFirstCurrencyValue = createAction(
   scoped`Set First Currency Value`,
-  props<{ firstCurrencyValue: number }>(),
+  props<{ firstCurrencyValue: number, changeSecondValue?:boolean }>(),
 );
 
 export const setSecondCurrencyValue = createAction(
-  scoped`Set Second Currency Valuet`,
-  props<{ secondCurrencyValue: number }>(),
+  scoped`Set Second Currency Value`,
+  props<{ secondCurrencyValue: number, changeFirstValue?:boolean }>(),
 );

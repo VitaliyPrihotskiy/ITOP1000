@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, EMPTY, filter, map, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, EMPTY, filter, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { CurrencyRatesService } from '../services/currency-rates.service';
 import {
   loadCurrencyRate,
+  loadCurrencyRateFailure,
   loadCurrencyRates,
   loadCurrencyRatesFailure,
   loadCurrencyRatesSuccess,
@@ -52,7 +53,7 @@ export class CurrencyRatesEffect {
           filter(isDefined),
           map((currencyRate) => loadCurrencyRateSuccess({ currencyRate })),
           catchError((error) => {
-            return of(loadCurrencyRatesFailure(error));
+            return of(loadCurrencyRateFailure(error));
           }),
         );
       }),
@@ -65,7 +66,8 @@ export class CurrencyRatesEffect {
       withLatestFrom(
         this.store.select(getCurrencyRate),
       ),
-      filter(([, currencyRate]) => isDefined(currencyRate)),
+      tap(console.log),
+      filter(([{ changeSecondValue }, currencyRate]) => !!changeSecondValue && isDefined(currencyRate)),
       map(([{ firstCurrencyValue }, currencyRate]) => {
         const secondCurrencyValue = firstCurrencyValue * (currencyRate?.rate || 0)
         return setSecondCurrencyValue({ secondCurrencyValue });
@@ -79,7 +81,7 @@ export class CurrencyRatesEffect {
       withLatestFrom(
         this.store.select(getCurrencyRate),
       ),
-      filter(([, currencyRate]) => isDefined(currencyRate)),
+      filter(([{ changeFirstValue }, currencyRate]) => !!changeFirstValue && isDefined(currencyRate)),
       map(([{ secondCurrencyValue }, currencyRate]) => {
         const firstCurrencyValue = secondCurrencyValue * (currencyRate?.inverseRate || 0)
         return setFirstCurrencyValue({ firstCurrencyValue });

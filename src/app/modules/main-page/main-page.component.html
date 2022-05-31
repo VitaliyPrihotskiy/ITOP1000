@@ -1,66 +1,71 @@
-<div *ngIf="ratesStates$ | async as rate">
+<div *ngIf="rates">
     <header>
-        <span>
-            Курс долара {{rate[0].rateBuy}}/{{rate[0].rateSell}}
-        </span>
-        <span>
-            Курс євро {{rate[1].rateBuy}}/{{rate[1].rateSell}}
-        </span>
+        <span>Курс долара {{rates.usd.rateBuy}} / {{rates.usd.rateSell}}</span>
+        <span class="error" *ngIf="getError$ | async">{{getError$| async}}</span>
+        <span>Курс євро {{rates.euro.rateBuy}} / {{rates.euro.rateSell}}</span>
+        
     </header>
     <main>
         <div class="box">
             <h2>Конвертер валют</h2>
             <div class="content">
-                <div class="currency-box">
-                    <input
-                        #firstInp
-                        [value]="firstCurrencyValue$"
-                        (change)="setCurrencyValue(firstInp.value,true)"
-                        formControlName="firstCurrencyValue"
-                    >
-                    <span *ngIf="firstCurrencyValue.invalid && firstCurrencyValue.dirty">Можна вводити лише числа</span>
-                    <div class="ng-autocomplete">
-                        <ng-autocomplete
-                            [data]="data"
-                            [searchKeyword]="keyword"
-                            placeholder="Select currency code"
-                            (selected)='setCurrency($event,true)'
-                            [itemTemplate]="itemTemplate"
-                        >
-                        </ng-autocomplete>
-                        <ng-template
-                            #itemTemplate
-                            let-item
-                        >
-                            <a [innerHTML]="item.alphaCode"></a>
-                        </ng-template>
+                <form
+                    novalidate
+                    [formGroup]="currencyForm"
+                >
+                    <div class="currency-box">
+                        <div class="ng-autocomplete">
+                            <ng-autocomplete
+                                formControlName="firstCurrency"
+                                [data]="data"
+                                [searchKeyword]="keyword"
+                                placeholder="Select currency code"
+                                (selected)='setCurrency($event,true)'
+                                [itemTemplate]="itemTemplate"
+                            >
+                            </ng-autocomplete>
+                            <ng-template
+                                #itemTemplate
+                                let-item
+                            >
+                                <a [innerHTML]="item.alphaCode"></a>
+                            </ng-template>
+                            <input
+                                formControlName="firstCurrencyValue"
+                                #firstInp
+                                type="number"
+                                class="currency-value"
+                                (change)="setCurrencyValue(firstInp.value,true)"
+                            >
+                        </div>
                     </div>
-                </div>
-                <div class="currency-box">
-                    <input
-                        #secondInp
-                        [value]="secondCurrencyValue$"
-                        (change)="setCurrencyValue(secondInp.value,false)"
-                        formControlName="secondCurrencyValue"
-                    >
-                    <span *ngIf="secondCurrencyValue.invalid && secondCurrencyValue.dirty">Можна вводити лише числа</span>
-                    <div class="ng-autocomplete">
-                        <ng-autocomplete
-                            [data]="data"
-                            [searchKeyword]="keyword"
-                            placeholder="Select currency code"
-                            (selected)='setCurrency($event,false)'
-                            [itemTemplate]="itemTemplate"
-                        >
-                        </ng-autocomplete>
-                        <ng-template
-                            #itemTemplate
-                            let-item
-                        >
-                            <a [innerHTML]="item.alphaCode"></a>
-                        </ng-template>
+                    <div class="currency-box">
+                        <div class="ng-autocomplete">
+                            <ng-autocomplete
+                                formControlName="secondCurrency"
+                                [data]="data"
+                                [searchKeyword]="keyword"
+                                placeholder="Select currency code"
+                                (selected)='setCurrency($event,false)'
+                                [itemTemplate]="itemTemplate"
+                            >
+                            </ng-autocomplete>
+                            <ng-template
+                                #itemTemplate
+                                let-item
+                            >
+                                <a [innerHTML]="item.alphaCode"></a>
+                            </ng-template>
+                            <input
+                                type="number"
+                                class="currency-value"
+                                #secondInp
+                                (change)="setCurrencyValue(secondInp.value,false)"
+                                formControlName="secondCurrencyValue"
+                            >
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </main>

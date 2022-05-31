@@ -1,7 +1,7 @@
-import { CurrencyRate, CurrencyRates, MonobankRate } from '../models/currency-rate.model';
+import { CurrencyRate, MonobankRate } from '../models/currency-rate.model';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CurrencyRatesService {
@@ -11,13 +11,15 @@ export class CurrencyRatesService {
     return this.httpClient.get<MonobankRate[]>(
       `https://api.monobank.ua/bank/currency`,
     );
-  }
-  
+  };
+
   getCurrencyRate(firstCurrency: string, secondCurrency: string): Observable<CurrencyRate | undefined> {
-    return this.httpClient.get<CurrencyRates>(
+    return this.httpClient.get<CurrencyRate[]>(
       `${`http://www.floatrates.com/daily`}/${firstCurrency}.json`)
       .pipe(
-        map((currencyRates: CurrencyRates) => { return currencyRates.usd.find((currencyRate: CurrencyRate) => currencyRate.alphaCode === secondCurrency) })
+        map((currencyRates: CurrencyRate[]) => {
+          return Object.values(currencyRates).find((currencyRate: CurrencyRate) => currencyRate.alphaCode === secondCurrency)
+        })
       );
-  }
+  };
 }
