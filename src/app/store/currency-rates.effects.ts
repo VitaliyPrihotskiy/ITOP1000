@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, EMPTY, filter, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
+import { catchError, filter, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
+import { alphaCode, initialDollarEuroRateState } from '../constants/constants';
 import { CurrencyRatesService } from '../services/currency-rates.service';
+import { isDefined } from '../utiles/utiles';
 import {
   loadCurrencyRate,
   loadCurrencyRateFailure,
@@ -32,10 +34,33 @@ export class CurrencyRatesEffect {
       ofType(loadCurrencyRates),
       switchMap(() => {
         return this.currencyRatesService.getCurrencyRates().pipe(
-          map((currencyRates) => loadCurrencyRatesSuccess({ currencyRates })),
-          catchError((error) => {
-            return of(loadCurrencyRatesFailure(error));
+          map((currencyRates) => {
+            let rates = initialDollarEuroRateState;
+            const dollar = currencyRates.find(currencyRate => currencyRate.currencyCodeA === alphaCode.usd);
+            const euro = currencyRates.find(currencyRate => currencyRate.currencyCodeA === alphaCode.eur);
+
+            if (dollar) {
+              rates = {
+                ...rates, usd: {
+                  rateBuy: dollar.rateBuy,
+                  rateSell: dollar.rateSell
+                }
+              }
+            }
+
+            if (euro) {
+              rates = {
+                ...rates, eur: {
+                  rateBuy: euro.rateBuy,
+                  rateSell: euro.rateSell
+                }
+              }
+            }
+
+            return loadCurrencyRatesSuccess({ currencyRates: rates })
           }),
+          catchError(({ error }) => of(loadCurrencyRatesFailure({ error: error.errorDescription }))
+          ),
         );
       }),
     ),
@@ -66,10 +91,9 @@ export class CurrencyRatesEffect {
       withLatestFrom(
         this.store.select(getCurrencyRate),
       ),
-      tap(console.log),
       filter(([{ changeSecondValue }, currencyRate]) => !!changeSecondValue && isDefined(currencyRate)),
       map(([{ firstCurrencyValue }, currencyRate]) => {
-        const secondCurrencyValue = firstCurrencyValue * (currencyRate?.rate || 0)
+        const secondCurrencyValue = Math.floor(firstCurrencyValue * (currencyRate?.rate || 0) * 100) / 100
         return setSecondCurrencyValue({ secondCurrencyValue });
       }),
     ),
@@ -83,13 +107,11 @@ export class CurrencyRatesEffect {
       ),
       filter(([{ changeFirstValue }, currencyRate]) => !!changeFirstValue && isDefined(currencyRate)),
       map(([{ secondCurrencyValue }, currencyRate]) => {
-        const firstCurrencyValue = secondCurrencyValue * (currencyRate?.inverseRate || 0)
+        const firstCurrencyValue = Math.floor(secondCurrencyValue * (currencyRate?.inverseRate || 0) * 100) / 100
         return setFirstCurrencyValue({ firstCurrencyValue });
       }),
     ),
   );
 }
 
-const isDefined = <T>(arg: T | null | undefined): arg is T => {
-  return arg !== null && arg !== undefined;
-};
+

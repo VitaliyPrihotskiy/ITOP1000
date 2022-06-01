@@ -1,20 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-header {
+.container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.header {
     width: 100wv;
-    height: 245px;
-    padding-top: 10px;
-    margin-bottom: -95px;
+    height: 45px;
     background-image: url("https://cdn.wallpapersafari.com/67/76/qtpSIw.jpg");
     display: flex;
     justify-content: space-around;
+    align-items: center;
 }
 
 main {
+    opacity: 0.9;
+    padding-bottom: 28.5%;
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: #faebd7;
+    background-image: url("https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77701655108.jpg");
+    background-size: 100% auto;
 }
 
 .box {
@@ -25,10 +33,9 @@ main {
 }
 
 .content {
-    width: 1290px;
-    height: 800px;
+    opacity: 0.8;
     background: #FFFFFF;
-    border: 1px solid #EAEAEA;
+    border: 3px solid #097fee;
     box-shadow: 0px 8px 24px #0000000d;
     border-radius: 5px;
     display: flex;
@@ -37,33 +44,54 @@ main {
     padding: 50px;
 }
 
+.currency-box{
+        border: 3px solid #097fee;
+}
+
 h2 {
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.701);
     margin: 0;
-    padding-bottom: 10px;
+    padding: 10px;
     font-family: 'Montserrat';
     font-style: normal;
     font-weight: 800;
     font-size: 36px;
     line-height: 29px;
-    color: #363636;
-}
-
-input {
-    width: 592px;
-    height: 40px;
-    margin: 5px, 0, 5px, 0;
-}
-
-.error {
-    background-color: #EAEAEA;
-    color: #ff0000;
-    max-height: 15px;
+    color: #2f28f5de;
 }
 
 span {
+    text-shadow: 1px 1px 2px black;
     font-size: 20px;
-    padding: 5px;
     font-weight: bold;
-    margin: 10px;
     color: #FFFFFF;
+}
+
+input {
+    width: 145px;
+    height: auto;
+    margin: 5px, 0, 5px, 0;
+    border: 0px;
+}
+
+.ng-autocomplete {
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 430px) {
+    .ng-autocomplete {
+        width: 100%;
+        max-width: 200px;
+        display: flex;
+        margin: 0 auto;
+    }
+    input {
+        width: 50px;
+        height: auto;
+        margin: 5px, 0, 5px, 0;
+        border: 0px;
+    }
 }

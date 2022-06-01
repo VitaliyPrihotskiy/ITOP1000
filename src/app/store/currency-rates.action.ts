@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { CurrencyRate, MonobankRate } from '../models/currency-rate.model';
+import { CurrencyRate, DollarEuroRate } from '../models/currency-rate.model';
 
 function scoped(templateString: TemplateStringsArray) {
   return `Currency Rates: ${templateString[0]}`;
@@ -9,7 +9,7 @@ export const loadCurrencyRates = createAction(scoped`Load Currency Rates`);
 
 export const loadCurrencyRatesSuccess = createAction(
   scoped`Load Currency Rates Success`,
-  props<{ currencyRates: MonobankRate[] }>(),
+  props<{ currencyRates: DollarEuroRate }>(),
 );
 
 export const loadCurrencyRatesFailure = createAction(

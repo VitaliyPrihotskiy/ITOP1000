@@ -1,8 +1,8 @@
 import { Action, createReducer, on } from '@ngrx/store';
+import { initialDollarEuroRateState } from '../constants/constants';
 import {
   CurrencyRate,
-  initialCurrencyRateState,
-  MonobankRate,
+  DollarEuroRate,
 } from '../models/currency-rate.model';
 import {
   loadCurrencyRate,
@@ -20,9 +20,10 @@ import {
 export const CURRENCY_RATES_FEATURE_KEY = 'CurrencyRates';
 
 export interface CurrencyRatesState {
-  currencyRates: MonobankRate[];
-  currencyRate: CurrencyRate|null;
+  currencyRates: DollarEuroRate;
+  currencyRate: CurrencyRate | null;
   isLoading: boolean;
+  monobankError: unknown;
   error: unknown;
   firstCurrency: string;
   secondCurrency: string;
@@ -31,12 +32,13 @@ export interface CurrencyRatesState {
 }
 
 const initialState: CurrencyRatesState = {
-  currencyRates: [],
+  currencyRates: initialDollarEuroRateState,
   currencyRate: null,
   isLoading: false,
+  monobankError: null,
   error: null,
-  firstCurrency: 'USD',
-  secondCurrency: 'EUR',
+  firstCurrency: '',
+  secondCurrency: '',
   firstCurrencyValue: null,
   secondCurrencyValue: null,
 };
@@ -51,14 +53,14 @@ const currencyRateReducer = createReducer(
     ...state,
     currencyRates,
     isLoading: false,
-    error: null,
+    monobankError: null,
   })),
   on(loadCurrencyRatesFailure, (state, { error }) => ({
     ...state,
-    error:"Failed to load resource: the server responded with a status of 429 ()",
+    monobankError:error,
     isLoading: false,
   })),
-  on( loadCurrencyRateFailure, (state, { error }) => ({
+  on(loadCurrencyRateFailure, (state, { error }) => ({
     ...state,
     error,
     isLoading: false,

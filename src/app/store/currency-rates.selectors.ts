@@ -38,7 +38,7 @@ export const getSecondCurrencyValue = createSelector(
   (state) => state.secondCurrencyValue,
 );
 
-export const getError = createSelector(
+export const getMonobankError = createSelector(
   getCurrencyRatesFeatureState,
-  (state) => state.error,
+  (state) => state.monobankError,
 );

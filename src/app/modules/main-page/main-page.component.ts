@@ -1,16 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import {
   currencyCode,
-  CurrencyRate,
-  currencyCodes,
-  MonobankRate,
 } from 'src/app/models/currency-rate.model';
 import {
   getCurrencyRates,
-  getError,
-  getFirstCurrency,
   getFirstCurrencyValue,
-  getSecondCurrency,
+  getMonobankError,
   getSecondCurrencyValue,
 } from 'src/app/store/currency-rates.selectors';
 import {
@@ -23,9 +18,10 @@ import {
 } from 'src/app/store/currency-rates.action';
 import { Store } from '@ngrx/store';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subject, takeUntil } from 'rxjs';
+import { currencyCodes, initialDollarEuroRateState } from 'src/app/constants/constants';
 
-export const INTEGER_REG_EXP = /^[-+]?(\d+)$/;
+const INTEGER_REG_EXP = /^(\d+)$/;
 
 @Component({
   selector: 'app-main-page',
@@ -33,19 +29,24 @@ export const INTEGER_REG_EXP = /^[-+]?(\d+)$/;
   styleUrls: ['./main-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MainPageComponent implements OnInit {
+export class MainPageComponent implements OnInit, OnDestroy {
   readonly ratesStates$ = this.store.select(getCurrencyRates);
-  readonly getError$ = this.store.select(getError);
-
+  readonly getError$ = this.store.select(getMonobankError);
   readonly firstCurrencyValue$ = this.store.select(getFirstCurrencyValue);
   readonly secondCurrencyValue$ = this.store.select(getSecondCurrencyValue);
 
-  currencyForm: FormGroup = new FormGroup({
+  readonly currencyForm: FormGroup = new FormGroup({
     firstCurrency: new FormControl("", [Validators.required]),
     secondCurrency: new FormControl("", [Validators.required]),
     firstCurrencyValue: new FormControl("", [Validators.required, Validators.pattern(INTEGER_REG_EXP)]),
     secondCurrencyValue: new FormControl("", [Validators.required, Validators.pattern(INTEGER_REG_EXP)]),
   });
+
+  keyword = 'alphaCode';
+  data = currencyCodes;
+  rates = initialDollarEuroRateState;
+
+  private readonly destroy$ = new Subject();
 
   get firstCurrency(): AbstractControl | null {
     return this.currencyForm.get('firstCurrency');
@@ -63,56 +64,40 @@ export class MainPageComponent implements OnInit {
     return this.currencyForm.get('secondCurrencyValue');
   };
 
-  public keyword = 'alphaCode';
-  public data = currencyCodes;
-  public rates = {
-    usd: {
-      rateBuy: 0,
-      rateSell: 0
-    },
-    euro: {
-      rateBuy: 0,
-      rateSell: 0
-    }
-  };
-
   constructor(
     private readonly store: Store,
-    private readonly changeDetector: ChangeDetectorRef) {
+    private readonly changeDetection: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
-    this.firstCurrencyValue$.subscribe(value => {
-      this.firstCurrencyValue?.setValue(value);
-    });
+    this.store.dispatch(
+      loadCurrencyRates(),
+    );
+    
+    this.firstCurrencyValue$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        this.firstCurrencyValue?.setValue(value);
+      });
 
-    this.secondCurrencyValue$.subscribe(value => {
-      this.secondCurrencyValue?.setValue(value);
-    });
+    this.secondCurrencyValue$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        this.secondCurrencyValue?.setValue(value);
+      });
 
     combineLatest([this.firstCurrency?.valueChanges, this.secondCurrency?.valueChanges])
+      .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        console.log(this.firstCurrency, this.secondCurrency, this.firstCurrency?.valid && this.secondCurrency?.valid);
         this.changeRate();
       })
-
-    this.store.dispatch(loadCurrencyRates());
-    this.ratesStates$.subscribe(rates => {
-      const dollar = rates.find(currencyRate => currencyRate.currencyCodeA === 840);
-      if (dollar) {
-        this.rates.usd.rateBuy = dollar.rateBuy;
-        this.rates.usd.rateSell = dollar.rateSell;
-      }
-      const euro = rates.find(currencyRate => currencyRate.currencyCodeA === 978);
-      if (euro) {
-        this.rates.euro.rateBuy = euro.rateBuy;
-        this.rates.euro.rateSell = euro.rateSell;
-        this.changeDetector.detectChanges()
-      }
-    })
   }
 
-  changeRate() {
+  onChange(): void {
+    this.changeDetection.markForCheck();
+  }
+
+  changeRate(): void {
     if (this.firstCurrency?.valid && this.secondCurrency?.valid) {
       this.store.dispatch(
         loadCurrencyRate(),
@@ -120,7 +105,7 @@ export class MainPageComponent implements OnInit {
     }
   }
 
-  setCurrency(input: currencyCode, isFirst: boolean) {
+  setCurrency(input: currencyCode, isFirst: boolean): void {
     if (isFirst) {
       this.store.dispatch(setFirstCurrency({ firstCurrency: input.alphaCode }));
     } else {
@@ -128,11 +113,16 @@ export class MainPageComponent implements OnInit {
     }
   }
 
-  setCurrencyValue(input: string, isFirst: boolean) {
+  setCurrencyValue(input: string, isFirst: boolean): void {
     if (isFirst) {
       this.store.dispatch(setFirstCurrencyValue({ firstCurrencyValue: +input, changeSecondValue: true }));
     } else {
       this.store.dispatch(setSecondCurrencyValue({ secondCurrencyValue: +input, changeFirstValue: true }));
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 }
